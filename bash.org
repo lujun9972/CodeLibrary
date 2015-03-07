@@ -1,0 +1,119 @@
+#+TITLE: bash
+#+AUTHOR: DarkSun
+#+OPTIONS: ^{}
+
+* 获取文件的目录路径												   :path:
+  #+BEGIN_SRC sh
+   function GetAbsDirPath
+    {
+        encodedPwd=$(echo $(pwd) |sed "s/\//\\\\\//g")
+        echo $1 |sed "s/\($encodedPwd\/\)*\(.*\/\).*/\2/"
+    }
+    
+  #+END_SRC
+* ftp多文件到其他IP的相同目录中											:ftp:
+#+BEGIN_SRC sh
+  function autoftp
+  {
+  D_PATH=`pwd`
+  D_FTP_IP=$1
+  D_FTP_USER=`whoami`
+  D_FTP_PWD=123456
+  
+  shift
+  D_OBJECT=$@
+  echo "ftp " $OBJECT " To " $D_FTP_IP$D_HOME/$D_OBJECT
+  ftp -n<<!
+  open $D_FTP_IP
+  user $D_FTP_USER $D_FTP_PWD
+  prompt off
+  bin
+  cd  $D_PATH
+  mput $D_OBJECT
+  
+  close
+  bye
+  !
+  }
+#+END_SRC
+
+* 导出多个DB2表格													:db2:需修改:
+  #+BEGIN_SRC sh
+    #!/bin/sh
+    db2 connect to cnaps2db user cnaps2 using 123456
+    for db2table in $@
+    do
+        db2file=$db2table.sql
+        db2 "export to $db2file of ixf select * from $db2table"
+    done
+    
+  #+END_SRC
+
+* 备份原文件,并释放tar包												:tar:需修改:
+  #+BEGIN_SRC sh
+    #!/bin/sh
+    function GetAbsDirPath
+    {
+        encodedPwd=$(echo $(pwd) |sed "s/\//\\\\\//g")
+        echo $1 |sed "s/\($encodedPwd\/\)*\(.*\/\).*/\2/"
+    }
+    tarFile=$1
+    srcDir=$(pwd)
+    # 备份tar包中的文件
+    destDir=~/oldcx/$(date +"%Y%m%d_%H%M%S")
+    mkdir -p $destDir
+    for file in $(tar -tf $tarFile)
+    do
+        case $file in
+            ,*/)
+                echo "$file 是目录,跳过"
+                ;;
+            ,*)
+                AbsPath=`GetAbsDirPath $file`
+                if [ ! -d $destDir/$AbsPath ];then mkdir -p $destDir/$AbsPath;fi
+                echo mv $file $destDir/$AbsPath
+                mv $file $destDir/$AbsPath
+                ;;
+        esac
+    done
+    
+    # 释放tar包
+    cd $srcDir
+    tar -xvf $tarFile
+  #+END_SRC
+* 查找所有$PATH中的指定命令的版本
+  #+BEGIN_SRC sh
+    #! /bin/sh
+    # 用于检测可执行文件的命令
+    testx="test -x"
+    
+    #将$PATH中的::用当前路径.来代替
+    fixpath=$(echo $PATH |sed -e 's/^:/.:/' -e 's/::/:."/g' -e 's/:$/:./')
+    
+    IFS=":  "  #为解析$PATH,设置$IFS为冒号,空格和TAB
+    
+    for command in $@
+    do
+        where="" #将$where清空
+        # 如果某目录中包含可执行文件,就加入列表中
+    
+        for direc in $fixpath
+        do 
+            $testx $direc/$command && where="$where $direc/$command"
+        done
+    
+        case "$where" in
+            ?*) echo $where;; #如果$where中包含内容,则输出
+    
+        esac
+    done
+  #+END_SRC
+
+* 用户在进入/退出目录时,自动执行脚本								   :path:
+  #+BEGIN_SRC sh
+    cd (){
+        test -r .exit.sh && . .exit.sh
+        builtin cd "$1"
+        test -r .enter.sh &&. .enter.sh
+    }
+  #+END_SRC

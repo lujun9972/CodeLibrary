@@ -1,0 +1,117 @@
+#+TITLE: temp
+#+AUTHOR: DarkSun
+#+OPTIONS: ^{}
+
+
+* ftp多文件到其他IP的相同目录中
+#+BEGIN_SRC sh-mode
+  function autoftp
+{
+D_PATH=`pwd`
+D_FTP_IP=$1
+D_FTP_USER=`whoami`
+D_FTP_PWD=123456
+
+shift
+D_OBJECT=$@
+echo "ftp " $OBJECT " To " $D_FTP_IP$D_HOME/$D_OBJECT
+ftp -n<<!
+open $D_FTP_IP
+user $D_FTP_USER $D_FTP_PWD
+prompt off
+bin
+cd  $D_PATH
+mput $D_OBJECT
+
+close
+bye
+!
+}
+#+END_SRC
+
+* 用数组实现建议的MAP功能,代码中不出现new和delete,这样可以放在重载operator new和operator delelte时使用 :map:
+  #+BEGIN_SRC c++
+    #include <cassert>
+    #include <exception>
+    #ifndef null
+    #define null 0
+    #endif
+    template<typename KEYTYPE,typename VALUETYPE,int siz=1000>
+    class CMAP
+    {
+        public:
+            
+            struct pair
+            {
+                KEYTYPE first;
+                VALUETYPE second;
+                pair(const KEYTYPE& key,const VALUETYPE& value):first(key),second(value)
+                {
+                    
+                }
+                pair():first( KEYTYPE() ),second( VALUETYPE() )
+                {
+                    
+                }
+            };
+            typedef unsigned long size_t;
+            typedef pair* iterator;
+            CMAP():_nums(0)
+            {
+            }
+            pair* find(const KEYTYPE& key)
+            {
+                for(size_t i  = 0;i < _nums;++i)
+                {
+                    if(_contents[i].first == key)
+                    {
+                        return _contents + i;
+                    }
+                }
+                return end();
+            }
+            
+            pair* end()
+            {
+                return _contents + _nums;
+            }
+            
+            pair erase(const KEYTYPE& key)
+            {
+                pair* pos = find(key);
+                assert(pos != null);
+                for(size_t i = pos - _contents; i < _nums; ++i)
+                {
+                    _contents[i] = _contents[i+1];
+                }
+                --_nums;
+            }
+            
+            pair* insert(const pair& content)
+            {
+                if(_nums >= siz)
+                {
+                    throw std::out_of_range("out of range");
+                }
+                _contents[_nums] = content;
+                pair* pos = _contents + _nums;
+                ++_nums;    
+                return pos;
+            }
+            
+            VALUETYPE& operator[] (const KEYTYPE& key)
+            {
+                pair* pos = find(key);
+                if(pos == end())
+                {
+                    pos = insert(pair(key,VALUETYPE()));
+                }
+                return pos->second;
+            }
+        private:
+            pair _contents[siz];
+            size_t _nums;
+    };
+    
+    
+  #+END_SRC

@@ -1,0 +1,537 @@
+* string_tool.cpp
+** 判断中文字符串是否被截断
+   #+BEGIN_SRC c++
+     int GbkCharLen(unsigned char c)
+     {
+             return c<127?1:2;
+     }
+     int Utf8CharLen(unsigned char c)
+     {
+             if(c > 0 && c <= 127)
+             {
+                     return 1;
+             }
+             else if(c>=192 && c<=223)
+             {
+                     return 2;
+             }
+             else if(c>=224 && c<=239)
+             {
+                     return 3;
+             }
+             else if(c>=240 && c<=247)
+             {
+                     return 4;
+             }
+     }
+     bool IsBrokenStr(const string& str,int (*f) (unsigned char c))
+     {
+             int i = 0;
+             while(i<str.size())
+             {
+                     i = i + f(str[i]);
+             }
+             if(i > str.size())
+             {
+                     return true;
+             }
+             return false;
+     }
+   #+END_SRC
+** 判断字符串是否以某字符串开头
+   #+BEGIN_SRC c++
+     bool IsStartWith(const string& str,const string& sBegin)
+     {
+             return str.find(sBegin) == 0;
+     }
+   #+END_SRC
+** 判断字符是否以某字符串结尾
+   #+BEGIN_SRC c++
+     bool IsEndWith(const string& str,const string& sEnd)
+     {
+             return str.rfind(sEnd) == str.size() -  sEnd.size();
+     }
+   #+END_SRC
+** 类型转换成字符串
+   #+BEGIN_SRC c++
+     template<class Type>
+     string Type2string(Type obj)
+     {
+             ostringstream os;
+             os << obj;
+             return string(os.str());
+     }
+   #+END_SRC
+** 字符串转换类型
+   #+BEGIN_SRC c++
+     template<typename Type>
+     Type String2type(string str)
+     {
+             Type obj;
+             istringstream is(str);
+             is >> obj;
+             return obj;
+     }
+   #+END_SRC
+** 分割含定界符的字符串
+   #+BEGIN_SRC c++
+     vector<string> split(const string&s,char c)
+     {
+             vector<string> v;
+             string::size_type i = 0;
+             string::size_type j = s.find(c);
+             while(j != string::npos){
+                     v.push_back(s.substr(i,j-1));
+                     i = ++j;
+                     j = s.find(c,j);
+                     
+                     if(j == string::npos){
+                             v.push_back(s.substr(i,s.length()));
+                     }
+             }
+             return v;
+     }
+   #+END_SRC
+** 判断指定字符是否在字符串中
+   #+BEGIN_SRC c++
+     class is_any_of
+     {
+         public:
+         is_any_of(const std::string& s):m_s(s)
+         {
+         }
+         bool operator()(char c)
+         {
+             return m_s.find(c) != std::string::npos;
+         }
+         private:
+             std::string m_s;
+         
+     };
+   #+END_SRC
+** 连接多个字符串
+   #+BEGIN_SRC c++
+     template<typename C>
+     string join(const C& cContainer,const string& sSep = "")
+     {
+         string sResult;
+         for(typename C::const_iterator p = cContainer.begin(); p != cContainer.end(); ++p) // 这里必须使用const_iterator,因为cContainer是const类型的
+         {
+             sResult += (*p);
+             if(p != cContainer.end() - 1)
+             {
+                 sResult += sSep;
+             }
+         }
+         return sResult;
+     }
+   #+END_SRC
+** 查找第n个子字符串
+   #+BEGIN_SRC c++
+     template<typename T>
+     int nthSubstr(int n,const basic_string<T>& s,const basic_string<T>& p,bool repeats = false)
+     {
+     
+     }
+   #+END_SRC
+** 字符串转换为大小写形式
+   #+BEGIN_SRC c++
+     string toUpper(string s)
+     {
+             for(string::iterator p = s.begin(); p != s.end(); ++p)
+             {
+                     ,*p = toupper(*p);
+             }
+             return s;
+     }
+     string toLower(string s)
+     {
+             for(string::iterator p = s.begin(); p != s.end(); ++p)
+             {
+                     ,*p = tolower(*p);
+             }
+             return s;
+     }
+   #+END_SRC
+** 忽略大小写的情况下查找子字符串的位置
+   #+BEGIN_SRC c++
+     bool caseIngoreCharComp(char a,char b)
+     {
+         return (toupper(a) == toupper(b));
+     }
+     
+     string::size_type caseIgnoreFind(const string& s,const string& p)
+     {
+         string::const_iterator pos = search(s.begin(),s.end(),p.begin(),p.end(),caseIngoreCharComp);
+         if(pos == s.end())
+         {
+             return string::npos;
+         }
+         return pos - s.begin();
+     }
+   #+END_SRC
+** 把多个空格压缩成1个空格
+   #+BEGIN_SRC c++
+     void zipBlanks(basic_istream<char>& ifs,basic_ostream<char>& ofs)
+     {
+             string tmp;
+             ifs >> tmp;
+             ofs << tmp;
+             while(ifs >> tmp)
+             {
+                     ofs<<" "<<tmp;
+             }
+     }
+   #+END_SRC
+** 根据本地规则判断字符串的大小
+   #+BEGIN_SRC c++
+     bool localLessThan(const string& s1, const string& s2)
+     {
+             const collate<char> & col = use_facet<collate<char> >(locale());
+             const char* pb1 = s1.data();
+             const char* pb2 = s2.data();
+             return (col.compare(pb1,pb1+s1.size(),
+                                 pb2,pb2+s2.size()) < 0);
+     }
+   #+END_SRC
+* 类型之间相互转换
+  #+BEGIN_SRC c++
+	template<typename TypeSrc,typename TypeDes)
+	TypeDes Type2Type(TypeSrc obj)
+	{
+			return String2Type<typeDes>(Type2String(obj));
+	}
+  #+END_SRC
+* STL相关容器
+** 使用逗号表达式来初始化容器
+   #+BEGIN_SRC c++
+     template<class Seq_T>
+     class comma_helper
+     {
+     public:
+         typedef typename Seq_T::value_type value_type;
+         explicit comma_helper(Seq_T& x) :m(x){
+         }
+         comma_helper& operator=(const value_type& x){
+             m.clear();
+             return operator+=(x);
+         }
+         comma_helper& operator+=(const value_type& x){
+             m.insert(m.end(),x);
+             return *this;
+         }
+         
+         template<class Scalar_T>
+         comma_helper& operator,(Scalar_T x){
+             return operator+=(x);
+         }
+     private:
+         Seq_T& m;
+     };
+     
+     template<typename Seq_T>
+     comma_helper<Seq_T> initialize(Seq_T& x)
+     {
+         return comma_helper<Seq_T>(x);
+     }
+     
+     
+     int main(int argc,char** argv)
+     {
+         map<int,string> m;
+         initialize(m) = make_pair(1,"one"),make_pair(2,"two"),make_pair(3,"three");
+         cout<<m[2]<<endl;
+         vector<int> v;
+         initialize(v) = 9,8,7,6,5,4,3;
+         cout<<v[2]<<endl;
+         return 0;
+     }
+   #+END_SRC
+
+** 用数组实现简易的MAP接口,在代码中不适用new和delete操作,可以使用在重载operator new和operator delete中 :STL:
+   #+BEGIN_SRC c++
+     #ifndef __ARRAYMAP_H__
+     #define __ARRAYMAP_H__
+     #include <cassert>
+     #include <exception>
+     #ifndef null
+     #define null 0
+     #endif
+     template<typename KEYTYPE,typename VALUETYPE,int siz=1000>
+     class ArrayMap
+     {
+         public:
+             struct pair
+             {
+                 KEYTYPE first;
+                 VALUETYPE second;
+                     pair(const KEYTYPE& key,const VALUETYPE& value):first(key),second(value)
+                     {
+                     
+                     }
+                     pair():first( KEYTYPE() ),second( VALUETYPE() )
+                     {
+                     
+                     }
+             };
+             typedef unsigned long size_t;
+             typedef pair* iterator;
+         ArrayMap():_nums(0)
+             {
+             }
+             pair* find(const KEYTYPE& key)
+             {
+                 for(size_t i  = 0;i < _nums;++i)
+                 {
+                     if(_contents[i].first == key)
+                     {
+                         return _contents + i;
+                     }
+                 }
+                     return end();
+             }
+             
+             pair* begin()
+             {
+                 return _contents;
+             }
+     
+             pair* end()
+             {
+                 return _contents + _nums;
+             }
+             
+             void erase(const KEYTYPE& key)
+             {
+                 pair* pos = find(key);
+                     assert(pos != null);
+                     for(size_t i = pos - _contents; i < _nums; ++i)
+                     {
+                         _contents[i] = _contents[i+1];
+                     }
+                     --_nums;
+             }
+             
+             pair* insert(const pair& content)
+             {
+                 if(_nums >= siz)
+                 {
+                     /* throw std::out_of_range("out of range"); */
+                     throw "out of range";
+                 }
+                     _contents[_nums] = content;
+                     pair* pos = _contents + _nums;
+                     ++_nums;    
+                     return pos;
+             }
+             
+             VALUETYPE& operator[] (const KEYTYPE& key)
+             {
+                 pair* pos = find(key);
+                     if(pos == end())
+                     {
+                         pos = insert(pair(key,VALUETYPE()));
+                     }
+                     return pos->second;
+             }
+         
+             bool empty()
+             {
+                 return _nums == 0;
+             }
+         private:
+             pair _contents[siz];
+             size_t _nums;
+     };
+     #endif
+   #+END_SRC
+
+* 重载new和delete函数,以实现内存检测								 :memory:
+  #+BEGIN_SRC c++
+    #include <new>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cassert>
+    #include <cstddef>
+    #include <pthread.h>
+    #include "arrayMap.h"
+    #include "memCheck.h"
+    #undef new
+    using namespace std;
+    
+    bool traceFlag = true;
+    bool activeFlag = true;
+    class CMutex
+    {
+    public:
+        pthread_mutex_t m_Mutex;
+        CMutex()
+        {
+            pthread_mutex_init(&m_Mutex, NULL);
+        }
+    
+        ~CMutex()
+        {
+            pthread_mutex_destroy(&m_Mutex);
+        }
+    };
+    class LockMutex
+    {
+    public:
+        LockMutex(CMutex& cMutex):m_cMutex(cMutex){
+            pthread_mutex_lock(&m_cMutex.m_Mutex);
+        }
+        ~LockMutex(){
+            pthread_mutex_unlock(&m_cMutex.m_Mutex);
+        }
+    private:
+        CMutex& m_cMutex;
+    };
+    static CMutex onlyMutex;
+    namespace {
+        //Memory map entry type
+        struct Info
+        {
+            bool isArray;
+            const char* file;
+            long line;
+        };
+    ArrayMap<void*,Info,5000> memMap;
+    
+        //Dummy type for static destructor
+        struct Sentinel{
+            ~Sentinel(){
+                if(!memMap.empty()){
+                    printf("Leaked Memory at:\n");
+                    for(ArrayMap<void*,Info,5000>::iterator itr = memMap.begin();itr != memMap.end();++itr){
+                        printf("\t%p(file:%s,line:%ld)\n",itr->first,(itr->second).file,(itr->second).line);
+                    }
+                }
+                else{
+                    printf("No User memory leaks!\n");
+                }
+            }
+        };
+        //static dummy object
+        Sentinel s;
+    } //End anonymous namespace
+    
+    // Overload scalar new
+    void* operator new(size_t siz,const char* file,long line){
+        LockMutex clockMutex(onlyMutex);
+        void* p = malloc(siz);
+        if(activeFlag){
+            Info info;
+            info.file = file;
+            info.line = line;
+            info.isArray = false;
+            memMap[p] = info;
+        }
+        if(traceFlag){
+            printf("Allocated %u bytes at address %p,not array",siz,p);
+            printf("file:%s,line:%ld\n",file,line);
+        }
+        return p;
+    }
+    void* operator new(size_t siz)
+    {
+        LockMutex clockMutex(onlyMutex);
+        void* p = malloc(siz);
+        if(activeFlag){
+            Info info;
+            info.file = "null";
+            info.line = 0;
+            info.isArray = false;
+            memMap[p] = info;
+        }
+        if(traceFlag){
+            printf("Allocated %u bytes at address %p,not array\n",siz,p);
+            printf("file:%s,line:%ld\n","null",0);
+        }
+        return p;
+    }
+    
+    //Overload array new
+    void* operator new[](size_t siz,const char* file,long line){
+        LockMutex clockMutex(onlyMutex);
+        void* p = malloc(siz);
+        if(activeFlag){
+            Info info;
+            info.file = file;
+            info.line = line;
+            info.isArray = true;
+            memMap[p] = info;
+        }
+        if(traceFlag){
+            printf("Allocated %u bytes at address %p,is array",siz,p);
+            printf("file:%s,line:%ld\n",file,line);
+        }
+        return p;
+    }
+    void* operator new[](size_t siz)
+    {
+        LockMutex clockMutex(onlyMutex);
+        void* p = malloc(siz);
+        if(activeFlag){
+            Info info;
+            info.file = "null";
+            info.line = 0;
+            info.isArray = true;
+            memMap[p] = info;
+        }
+        if(traceFlag){
+            printf("Allocated %u bytes at address %p,is array",siz,p);
+            printf("file:%s,line:%ld\n","null",0);
+        }
+        return p;
+    }
+    
+    //Override scalar delete
+    void operator delete(void* p) throw()
+    {
+        LockMutex clockMutex(onlyMutex);
+        if(memMap.find(p) != memMap.end() ){
+            if( memMap[p].isArray == false) {
+                free(p);
+                memMap.erase(p);
+                if(traceFlag){
+                    printf("Deleted memory at address %p\n",p);
+                }
+            }
+            else{
+                printf("Attemp to delete array pointer:%p\n",p);
+            }
+        }else if(p &&activeFlag){
+            printf("Attemp to delete unknown pointer:%p\n",p);
+        }
+    }
+    void operator delete(void* p,const char*_file,int len) throw()
+    {
+        delete(p);
+    }
+    //Override array delete
+    void operator delete[](void* p) throw()
+    {
+        LockMutex clockMutex(onlyMutex);
+        if(memMap.find(p) != memMap.end() ){
+            if(memMap[p].isArray) {
+                free(p);
+                memMap.erase(p);
+                if(traceFlag){
+                    printf("Deleted memory at address %p\n",p);
+                }
+            }
+            else{
+                printf("Attemp to delete no array pointer:%p\n",p);
+            }
+        }else if(p &&activeFlag){
+            printf("Attemp to delete unknown pointer:%p\n",p);
+        }
+    }
+    void operator delete[](void* p,const char* file,int len) throw()
+    {
+        delete (p);
+    }
+    
+    
+  #+END_SRC
