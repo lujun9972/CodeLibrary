@@ -535,3 +535,69 @@
     
     
   #+END_SRC
+* 用管道实现的父子进程协同函数
+#+BEGIN_SRC C
+  #include <unistd.h>
+  #include <stdio.h>
+
+  static int pfd1[2],pfd2[2];
+
+  void TELL_WAIT()
+  {
+    if(pipe(pfd1)<0 || pipe(pfd2)<0)
+      {
+        printf("pipe failed\n");
+        exit -1;
+      }
+  }
+
+  void TELL_PARENT(pid_t pid);
+  {
+    if(write(pfd2[1],"c",1) != 1)
+      {
+        printf("write failed\n");
+        exit -1;
+      }
+  }
+
+  void WAIT_PARENT();
+  {
+    char c;
+    if(read(pfd1[0],&c,1) != 1)
+      {
+        printf("read failed\n");
+        exit -1;
+      }
+
+    if(c != 'p')
+      {
+        printf("%s:incrrect data:%c",__func__,c);
+        exit -1;
+      }
+  }
+
+  void TELL_CHILD(pid_t pid);
+  {
+    if(write(pfd1[1],"p",1) != 1)
+      {
+        printf("write failed\n");
+        exit -1;
+      }
+  }
+
+  void WAIT_CHILD();
+  {
+    char c;
+    if(read(pfd2[0],&c,1) != 1)
+      {
+        printf("read failed\n");
+        exit -1;
+      }
+
+    if(c != 'c')
+      {
+        printf("%s:incrrect data:%c",__func__,c);
+        exit -1;
+      }
+  }
+#+END_SRC
