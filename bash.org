@@ -117,3 +117,18 @@
         test -r .enter.sh &&. .enter.sh
     }
   #+END_SRC
+* assertº¯Êý
+#+BEGIN_SRC sh
+  function assert {
+      cmd=$1
+      should=$2
+      result=$($SHELL -c "$cmd")
+      echo "executing $cmd"
+      echo "result is $result,should be $should"
+      if echo $result |egrep $should >>/dev/null; then
+          echo "check is OK"
+      else
+          echo "check failed"
+      fi
+  }
+#+END_SRC
