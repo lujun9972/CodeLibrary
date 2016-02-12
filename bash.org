@@ -132,3 +132,7 @@
       fi
   }
 #+END_SRC
+* 同步时间
+#+BEGIN_SRC sh
+  sudo date -s "$(sudo ssh usr@ip "date +'%D %T'")"
+#+END_SRC
