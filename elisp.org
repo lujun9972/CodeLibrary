@@ -59,3 +59,33 @@
     (bindings--define-key global-map (kbd "C-c C-c") 'transformer-js)
   #+END_SRC
 
+
+* Show current timer task in header line
+#+BEGIN_SRC emacs-lisp
+(require 'org)
+(require 'org-timer)
+(require 'cl-lib)
+
+(defvar my/org-timer-current-task nil)
+
+(defun my/org-timer-start-hook ()
+  (setq my/org-timer-current-task (nth 4 (org-heading-components)))
+  (cl-loop for buf in (buffer-list)
+           unless (string-match-p "\\`[[:space:]*]" (buffer-name buf))
+           do
+           (with-current-buffer buf
+             (setq-local header-line-format '((" " my/org-timer-current-task " ")))))
+  (setq-default header-line-format '((" " my/org-timer-current-task " "))))
+
+(defun my/org-timer-end-hook ()
+  (cl-loop for buf in (buffer-list)
+           do
+           (setq header-line-format nil))
+  (setq-default header-line-format nil))
+
+(dolist (hook '(org-timer-set-hook))
+  (add-hook hook #'my/org-timer-start-hook))
+
+(dolist (hook '(org-timer-done-hook org-timer-cancel-hook))
+  (add-hook hook #'my/org-timer-end-hook))
+#+END_SRC
