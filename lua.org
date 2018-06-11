@@ -1,0 +1,23 @@
+#+TITLE: lua
+#+AUTHOR: lujun9972
+#+TAGS: CodeLibrary
+#+DATE: [2018-06-11 一 18:56]
+#+LANGUAGE:  zh-CN
+#+OPTIONS:  H:6 num:nil toc:t \n:nil ::t |:t ^:nil -:nil f:t *:t <:nil
+
+* 同步迭代多个迭代器
+#+BEGIN_SRC lua :tangle lua.lua
+function combine(...)
+  args = {...}
+  return function()
+    local unpack = unpack or table.unpack
+    local ret={}
+    for _,iter in ipairs(args) do
+      local var = iter and iter()
+      if not var then iter = nil end
+      table.insert(ret, var)
+    end
+    return unpack(ret)
+  end
+end
+#+END_SRC
