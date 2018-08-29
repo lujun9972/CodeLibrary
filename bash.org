@@ -186,3 +186,5 @@ HDMI-3 disconnected (normal left inverted right x axis y axis)
 DP-2 disconnected (normal left inverted right x axis y axis)
 DP-3 disconnected (normal left inverted right x axis y axis)
 #+END_SRC
+
+可以看到目前连接的interface只有 =LVDS-1=
