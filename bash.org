@@ -136,3 +136,19 @@
 #+BEGIN_SRC sh
   sudo date -s "$(sudo ssh usr@ip "date +'%D %T'")"
 #+END_SRC
+* urlencode
+#+BEGIN_SRC shell
+  function URLEncode {
+      local dataLength="${#1}"
+      local index
+      for ((index = 0;index < dataLength;index++))
+      do local char="${1:index:1}"
+         case $char in [a-zA-Z0-9.~_-])
+                           printf "$char"
+                           ;;
+                       ,*) printf "%%%02X" "'$char"
+                          ;;
+         esac
+      done
+  }
+#+END_SRC
