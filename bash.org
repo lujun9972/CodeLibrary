@@ -188,3 +188,9 @@ DP-3 disconnected (normal left inverted right x axis y axis)
 #+END_SRC
 
 可以看到目前连接的interface只有 =LVDS-1=
+* 将图片转换为图标
+#+BEGIN_SRC shell
+  convert -background transparent input.png -define icon:auto-resize=16,32,48,64,128 favicon.ico
+#+END_SRC
+
+需要安装imagemagick,其中 =-background transparent= 参数是可选的
