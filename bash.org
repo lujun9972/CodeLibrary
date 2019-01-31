@@ -210,3 +210,23 @@ DP-3 disconnected (normal left inverted right x axis y axis)
 #+END_SRC
 
 需要安装imagemagick,其中 =-background transparent= 参数是可选的
+* Download all default installed apk files from your android. 
+#+BEGIN_SRC shell
+  for i in $(adb shell pm list packages | awk -F':' '{print $2}'); do adb pull "$(adb shell pm path $i | awk -F':' '{print $2}')"; mv *.apk $i.apk 2&> /dev/null ;done
+#+END_SRC
+* Print a horizontal line 
+
+Replace the underscore with any other character. e.g. + or - or = 
+#+BEGIN_SRC shell
+  printf "%`tput cols`s"|sed "s/ /_/g"
+#+END_SRC
+* Capture video of a linux desktop 
+This will grab the image from desktop, starting with the upper-left corner at x=100, y=200 with a width and height of 1024?768. 
+#+BEGIN_SRC shell
+  ffmpeg -video_size 1024x768 -framerate 25 -f x11grab -i :0.0+100,200 output.mp
+#+END_SRC
+* Make M-j insert (duplicate) the last word of the Readline line buffer in Bash 
+!# is the current line, :$ is the last word, and \e^ is history-expand-line . 
+#+BEGIN_SRC shell
+  bind '"\ej": "!#:$\e^"'
+#+END_SRC
