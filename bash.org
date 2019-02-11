@@ -230,3 +230,7 @@ This will grab the image from desktop, starting with the upper-left corner at x=
 #+BEGIN_SRC shell
   bind '"\ej": "!#:$\e^"'
 #+END_SRC
+* 根据私钥生成公钥
+#+BEGIN_SRC shell
+  ssh-keygen -y -f privatekey.pem > publickey.pem
+#+END_SRC
