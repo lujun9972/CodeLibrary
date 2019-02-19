@@ -234,3 +234,37 @@ This will grab the image from desktop, starting with the upper-left corner at x=
 #+BEGIN_SRC shell
   ssh-keygen -y -f privatekey.pem > publickey.pem
 #+END_SRC
+* Growing the Root File System on First Boot
+Idea behind the expanding root file system is first expanding the root file system to full available size and then run resize2fs on the expanded partition to grow file system. resize2fs is a tool specific for ext2/3/4 file system. But this needs to be done before the file system is mounted.
+#+BEGIN_SRC shell
+  #!/bin/sh
+
+  # Just extracts root partition and removes partition number to get the device
+  # name eg. /dev/sda1 becomes /dev/sda
+  roottmp=$(lsblk -l -o NAME,MOUNTPOINT | grep '/$')
+  rootpart=/dev/${roottmp%% */}
+  rootdev=${rootpart%1}
+
+  # Use sfdisk to extend partition to all available free space on device.
+  flock $rootdev sfdisk -f $rootdev -N 2 <<EOF
+  ,+
+  EOF
+
+  sleep 5
+
+  # Wait for all pending udev events to be handled
+  udevadm settle
+
+  sleep 5
+
+  # detect the changes to partition (we extended it).
+  flock $rootdev partprobe $rootdev
+
+  # remount the root partition in read write mode
+  mount -o remount,rw $rootpart
+
+  # Finally grow the file system on root partition
+  resize2fs $rootpart
+
+  exit 0fs
+#+END_SRC
