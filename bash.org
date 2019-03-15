@@ -268,3 +268,20 @@ Idea behind the expanding root file system is first expanding the root file syst
 
   exit 0fs
 #+END_SRC
+* 禁止/允许Ping回应
+** 禁止Ping回应
+iptables firewall is based on some set of rules. You can add the following rule in order to block pings to and from the server. The command will print an error message when you run the ping command:
+
+#+BEGIN_SRC shell
+  sudo iptables -A INPUT -p icmp --icmp-type echo-request -j REJECT
+#+END_SRC
+
+Or else, you can add the following rules in order to block ping without printing an error message:
+#+BEGIN_SRC shell
+  sudo iptables -A INPUT -p icmp --icmp-type echo-request -j DROP
+  sudo iptables -A OUTPUT -p icmp --icmp-type echo-reply -j DROP
+#+END_SRC
+** 允许Ping回应
+#+BEGIN_SRC shell
+  sudo iptables -D INPUT -p icmp --icmp-type echo-request -j REJECT
+#+END_SRC
